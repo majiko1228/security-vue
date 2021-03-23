@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cyp.security.mapper.UserMapper">
+
+    <select id="getAllUser" resultType="User">
+        select *
+        from tb_user
+    </select>
+
+    <select id="getUserByUserName" resultType="MyUserDetails">
+        SELECT *
+        from tb_user
+        WHERE username=#{username}
+    </select>
+
+
+    <select id="getRoleByUsername" resultType="String">
+        select role_code
+        FROM tb_role r
+        left join tb_user_role ur on r.role_id = ur.role_id
+        left join tb_user u on u.user_id = ur.user_id
+        where u.username=#{username}
+        </select>
+
+
+    <select id="getUrlsByUserName" resultType="String">
+        select url
+        from `tb_menu` m
+        left join tb_role_menu rm on m.menu_id = rm.menu_id
+        left join tb_role r on r.role_id = rm.role_id
+        left join tb_user_role ur on r.role_id = ur.role_id
+        left join tb_user u on u.user_id = ur.user_id
+        where u.username=#{username}
+    </select>
+
+    <select id="getMenuByRoles" resultType="Menu">
+        SELECT DISTINCT (m.menu_id),m.*
+        FROM tb_menu AS m,tb_role AS r,tb_role_menu AS rm
+        WHERE m.menu_id = rm.menu_id
+        AND r.role_id = rm.role_id
+        AND r.role_code IN
+        <foreach collection="roles" item="roleCode" open="(" separator="," close=")">
+            #{roleCode}
+        </foreach>
+    </select>
+
+    <delete id="delRole">
+        delete
+        from `tb_user_role`
+        where user_id = #{userId}
+    </delete>
+
+    <insert id="addUserRole">
+        insert
+        into `tb_user_role` (user_id,role_id)
+        values (#{userId},#{roleId})
+    </insert>
+
+    <resultMap id="UserList" type="User">
+        <result property="className" column="class_name"></result>
+    </resultMap>
+
+    <select id="selectUserList" resultMap="UserList">
+            select u.*,c.class_name
+            from tb_user as u,tb_classes as c
+            where (u.username like concat('%', #{username}, '%')
+            or u.nickname like concat('%', #{username}, '%'))
+            and u.class_id = c.class_id
+            <if test="status!=null">
+                and u.status = #{status}
+            </if>
+            <if test="endDate!=null">
+                and u.create_time between #{startDate} and #{endDate}
+            </if>
+    </select>
+
+    <select id="selectUserListCount" resultType="int">
+        select count(*)
+        from tb_user
+    </select>
+
+
+</mapper>

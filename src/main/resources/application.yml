@@ -1,0 +1,42 @@
+server:
+  port: 8888
+  servlet:
+    session:
+      timeout: 10s  #session失效时间1分钟
+      cookie:
+        http-only: true
+        secure: off
+
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_intermediary?useUnicode=true&characterEncoding=utf-8&serverTimezone = GMT%2B8&allowMultiQueries=true
+    username: root
+    password: 123456
+  security:
+    loginType: JSON
+
+#  对mybatis增删改查打印日志
+logging:
+  level:
+    cn.cyp.security.mapper: debug
+  file:
+    path: /rizhi.log
+mybatis-plus:
+  configuration:
+    #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true   #关闭 驼峰命名 下划线 映射
+  #  这种是在  src 下创建mapping文件夹
+  #    mapping-locations: classpath:cn/cyp/springsecurity/mapper/*.xml
+  #  这个是在resources下创建mapping文件夹
+  mapper-locations: classpath:mapping/*.xml
+  type-aliases-package: cn.cyp.security.pojo.**
+
+jwt:
+  #签名
+  secret: asdfgh
+  #过期时间30分钟,单位秒
+  expireTime: 3600
+  header: Authorization
